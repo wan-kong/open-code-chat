@@ -1,4 +1,4 @@
-import type { MessageData, ChatItemData } from "@/services/opencode"
+import type { ChatItemData } from "@/services/opencode"
 import type { ClassValue } from "clsx"
 import { clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
@@ -20,26 +20,22 @@ export const randomUUID = () => {
  */
 export const mergeMessage = (chatItems: ChatItemData[]): ChatItemData[] => {
   const result: ChatItemData[] = []
-
-  for (const item of chatItems) {
-    if ('permission' in item) {
-      // Permission独立显示，不合并
+  const data = JSON.parse(JSON.stringify(chatItems))
+  for (const item of data) {
+    if ('permission' in item || item.info.role === 'user') {
+      // Permission和user消息独立显示，不合并
       result.push(item)
     } else {
-      // 处理MessageData的合并逻辑
-      const messageData = item as MessageData
-      const { info, parts } = messageData
-
-      if (result.length > 0) {
-        const lastItem = result[result.length - 1]!
-        // 只有当最后一项也是message且role相同时才合并
-        if ('info' in lastItem && info.role === 'assistant' && lastItem.info.role === info.role) {
-          lastItem.parts.push(...parts)
-        } else {
-          result.push(messageData)
-        }
+      // assistant消息：检查上一条是否也是assistant，如果是则合并parts
+      const lastItem = result[result.length - 1]
+      if (lastItem &&
+        'info' in lastItem &&
+        lastItem.info.role === 'assistant') {
+        // 合并到上一条assistant消息
+        lastItem.parts.push(...item.parts)
       } else {
-        result.push(messageData)
+        // 新的assistant消息
+        result.push(item)
       }
     }
   }

@@ -1,6 +1,7 @@
 <template>
     <SidebarMenuItem>
-        <SidebarMenuButton @click="handleCreate" class="group text-muted-foreground hover:text-foreground">
+        <SidebarMenuButton @click="handleCreate"
+            class="cursor-pointer group text-muted-foreground hover:text-foreground">
             <Plus class="mr-2 h-4 w-4" />
             <span>新建会话</span>
         </SidebarMenuButton>

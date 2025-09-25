@@ -28,10 +28,10 @@
 <script setup lang="ts">
 // import { CheckCircleIcon } from 'lucide-vue-next'
 
-import type { Part } from '@opencode-ai/sdk'
+import type { StepFinishPart } from '@opencode-ai/sdk'
 
 interface Props {
-    part: Part
+    part: StepFinishPart
 }
 
 defineProps<Props>()

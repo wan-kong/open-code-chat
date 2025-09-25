@@ -49,10 +49,10 @@
 <script setup lang="ts">
 import { GitBranchIcon } from 'lucide-vue-next'
 
-import type { Part } from '@opencode-ai/sdk'
+import type { PatchPart } from '@opencode-ai/sdk'
 
 interface Props {
-    part: Part
+    part: PatchPart
 }
 
 defineProps<Props>()

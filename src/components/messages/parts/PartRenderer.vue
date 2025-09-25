@@ -1,5 +1,5 @@
 <template>
-    <component :is="partComponent" :part="part" v-if="partComponent" />
+    <component :is="partComponent" :part="part as any" v-if="partComponent" />
     <!-- Fallback for unknown part types -->
     <div v-else class="unknown-part">
         <div class="border border-yellow-200 rounded-lg p-3 bg-yellow-50">

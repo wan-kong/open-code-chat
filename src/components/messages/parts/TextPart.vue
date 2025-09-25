@@ -1,16 +1,13 @@
 <template>
-    <div class="prose prose-sm max-w-none">
-        <div class="whitespace-pre-wrap text-sm leading-relaxed">
-            {{ (part as any).text }}
-        </div>
-    </div>
+    <MarkdownRender :markdown="part.text" class="prose prose-sm text-sm" />
 </template>
 
 <script setup lang="ts">
-import type { Part } from '@opencode-ai/sdk'
+import { MarkdownRender } from '@/components/markdown-render';
+import type { TextPart } from '@opencode-ai/sdk'
 
 interface Props {
-    part: Part
+    part: TextPart
 }
 
 defineProps<Props>()

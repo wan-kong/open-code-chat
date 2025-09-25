@@ -9,10 +9,10 @@
 </template>
 
 <script setup lang="ts">
-import type { Part } from '@opencode-ai/sdk'
+import type { ReasoningPart } from '@opencode-ai/sdk'
 
 interface Props {
-    part: Part
+    part: ReasoningPart
 }
 
 defineProps<Props>()

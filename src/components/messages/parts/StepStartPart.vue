@@ -7,10 +7,10 @@
 <script setup lang="ts">
 // import { PlayIcon } from 'lucide-vue-next'
 
-import type { Part } from '@opencode-ai/sdk'
+import type { StepStartPart } from '@opencode-ai/sdk'
 
 interface Props {
-    part: Part
+    part: StepStartPart
 }
 
 defineProps<Props>()

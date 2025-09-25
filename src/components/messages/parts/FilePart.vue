@@ -16,10 +16,10 @@
 <script setup lang="ts">
 import { FileIcon } from 'lucide-vue-next'
 
-import type { Part } from '@opencode-ai/sdk'
+import type { FilePart } from '@opencode-ai/sdk'
 
 interface Props {
-    part: Part
+    part: FilePart
 }
 
 defineProps<Props>()

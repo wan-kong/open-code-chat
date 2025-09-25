@@ -36,10 +36,10 @@
 <script setup lang="ts">
 import { CameraIcon } from 'lucide-vue-next'
 
-import type { Part } from '@opencode-ai/sdk'
+import type { SnapshotPart } from '@opencode-ai/sdk'
 
 interface Props {
-    part: Part
+    part: SnapshotPart
 }
 
 defineProps<Props>()

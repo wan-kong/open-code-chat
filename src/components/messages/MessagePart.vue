@@ -1,7 +1,5 @@
 <template>
-    <div class="message-part">
-        <PartRenderer :part="part" />
-    </div>
+    <PartRenderer :part="part" />
 </template>
 
 <script setup lang="ts">

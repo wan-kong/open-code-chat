@@ -1,7 +1,7 @@
 <template>
     <SidebarMenuItem>
         <SidebarMenuButton :is-active="isActive" @click="$emit('select', session)"
-            :class="['group relative', isActive && 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary border-none']">
+            :class="['group relative cursor-pointer', isActive && 'bg-gradient-to-r from-primary/10 to-primary/5 text-primary border-none']">
             <MessageSquare class="mr-2 h-4 w-4" />
             <span class="truncate flex-1">{{ sessionTitle }}</span>
 

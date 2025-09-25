@@ -36,6 +36,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select'
+import type { AcceptableValue } from 'reka-ui'
 
 interface Props {
     projects: Project[]
@@ -50,7 +51,7 @@ interface Emits {
 const props = defineProps<Props>()
 const emit = defineEmits<Emits>()
 
-function handleProjectChange(projectId: string) {
+function handleProjectChange(projectId: AcceptableValue) {
     const project = props.projects.find(p => p.id === projectId)
     if (project) {
         emit('select', project)

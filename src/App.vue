@@ -3,11 +3,9 @@
     <div class="min-h-screen flex w-full">
       <!-- Sidebar -->
       <Sidebar>
-        <SidebarHeader class="border-b">
-          <div class="p-4">
-            <ProjectSelector :projects="projects" :current-project="activeProject" @select="handleProjectSelect"
-              @create="handleCreateProject" />
-          </div>
+        <SidebarHeader class="p-2.5">
+          <ProjectSelector :projects="projects" :current-project="activeProject" @select="handleProjectSelect"
+            @create="handleCreateProject" />
         </SidebarHeader>
 
         <SidebarContent>
@@ -24,15 +22,20 @@
       <!-- Main Content -->
       <SidebarInset class="flex-1 h-svh overflow-hidden flex flex-col">
         <!-- Header -->
-        <header class="shrink-0 flex h-16 items-center justify-between border-b px-4 bg-background">
-          <div class="flex gap-2 items-center">
+        <header class="shrink-0 flex h-14 items-center justify-between border-b px-4 bg-background">
+          <div class="flex gap-1 items-center">
             <SidebarTrigger class="-ml-1" />
             <Separator orientation="vertical" class="mr-2 h-4" />
-            <h1 class="text-lg font-semibold">Open Code Chat</h1>
+            <h1 class="text-lg font-semibold">OPENCODE Chat</h1>
           </div>
           <div class="flex items-center gap-2">
-            <ModelConfig></ModelConfig>
-            <ToolList></ToolList>
+            <ModelConfig />
+            <ToolList />
+            <Button size="icon" variant="ghost" class="h-8 w-8" :disabled="!activeProject"
+              @click="showFileSidebar = !showFileSidebar">
+              <FolderTreeIcon class="h-4 w-4" />
+              <span class="sr-only">文件列表</span>
+            </Button>
             <Avatar class="shrink-0">
               <AvatarFallback>
                 {{ config?.username?.slice(0, 1) }}
@@ -41,12 +44,20 @@
           </div>
         </header>
         <!-- Main Content Area -->
-        <MessageList :messages="mergedMessages" />
-
-        <!-- input  -->
-        <div class="shrink-0">
-          <MessageInput :is-loading="isLoadingMessages" @send-message="handleSendMessage" />
-        </div>
+        <ResizablePanelGroup direction="horizontal" class="flex-1 flex overflow-hidden">
+          <ResizablePanel class="flex-1 flex flex-col overflow-hidden">
+            <ScrollArea class="h-full">
+              <MessageList :messages="mergedMessages" />
+              <div class="sticky bottom-4 mx-auto mb-4 max-w-2xl w-2xl left-1/2 -translate-x-1/2">
+                <MessageInput :is-loading="isLoadingMessages || isStreaming" @send-message="handleSendMessage" />
+              </div>
+            </ScrollArea>
+          </ResizablePanel>
+          <ResizableHandle v-if="showFileSidebar"></ResizableHandle>
+          <ResizablePanel v-if="showFileSidebar">
+            <FileList :project="activeProject!" :session="activeSession!" />
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </SidebarInset>
     </div>
   </SidebarProvider>
@@ -75,21 +86,28 @@ import type { Config, Session, Event, Permission, Project } from '@opencode-ai/s
 import { mergeMessage } from './lib/utils'
 import { ModelConfig } from './components/model-config'
 import { ToolList } from './components/tool-list'
+import { FileList } from './components/file-list'
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/resizable'
+import { FolderTreeIcon } from 'lucide-vue-next'
+import { Button } from './components/ui/button'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
-
-// 模拟项目数据
+// 项目数据
 const projects = ref<Project[]>([])
 
 const activeProject = ref<Project | null>(projects.value[0] || null)
 
+const showFileSidebar = ref(false)
+
+
 function handleProjectSelect(project: Project) {
   activeProject.value = project
-  const displayName = project.worktree.split('/').pop() || project.worktree
-  console.log('Selected project:', displayName)
+  // const displayName = project.worktree.split('/').pop() || project.worktree
+  // console.log('Selected project:', displayName)
 }
 
 function handleCreateProject() {
-  console.log('Create new project')
+  // console.log('Create new project')
   // TODO: 实现新建项目逻辑
 }
 
@@ -117,12 +135,12 @@ loadConfig()
 const sessionList = ref<Session[]>([])
 const activeSession = ref<Session | null>(null)
 
-
 const currentMessages = ref<ChatItemData[]>([])
 const mergedMessages = computed(() => {
   return mergeMessage(currentMessages.value)
 })
 const isLoadingMessages = ref(false)
+const isStreaming = ref(false)
 
 // Event subscription controller
 let eventController: AbortController | null = null
@@ -186,7 +204,7 @@ function handleSessionDelete(session: Session) {
   }).then(() => {
     sessionList.value = sessionList.value.filter(s => s.id !== session.id)
     if (activeSession.value?.id === session.id) {
-      activeSession.value = sessionList.value[0] || null
+      handleSessionSelect(sessionList.value[0]!)
     }
   })
 }
@@ -214,40 +232,17 @@ function handleSendMessage(content: string) {
     console.warn('No active session to send message')
     return
   }
-
-  // const userMessage: MessageData = {
-  //   info: {
-  //     id: randomUUID(),
-  //     sessionID: activeSession.value.id,
-  //     role: 'user',
-  //     time: { created: Date.now() }
-  //   },
-  //   parts: [{ type: 'text', text: content, id: randomUUID(), sessionID: activeSession.value.id, messageID: '' }]
-  // }
-  // currentMessages.value.push(userMessage as ChatItemData)
-
+  isStreaming.value = true
   openCodeClient.session.prompt({
     path: {
       id: activeSession.value.id
     },
-    // parseAs: '',
     body: {
       parts: [{
         type: "text",
         text: content
       }]
     }
-  }).then(async () => {
-    // // data is ReadableStream
-    // const reader = response.body?.getReader()
-    // const decoder = new TextDecoder()
-    // while (true) {
-    //   const { done, value } = await reader?.read() || { done: true, value: new Uint8Array() }
-    //   if (done) break
-    //   const text = decoder.decode(value, { stream: true })
-    //   console.log('text', text)
-    // }
-    // // return response
   })
 
 }
@@ -256,8 +251,7 @@ function handleSendMessage(content: string) {
 const handleEventMessageUpdated = (event: Event) => {
   if (event.type !== 'message.updated') return
   const message = event.properties.info
-  if (!activeSession.value || message.sessionID !== activeSession.value.id) return
-
+  // if (!activeSession.value || message.sessionID !== activeSession.value.id) return
   // Find and update existing message or add new one
   const existingIndex = currentMessages.value.findIndex(item =>
     'info' in item && item.info.id === message.id
@@ -285,7 +279,6 @@ const handleEventMessagePartUpdated = (event: Event) => {
   if (messageIndex >= 0) {
     const message = currentMessages.value[messageIndex] as MessageData
     const partIndex = message.parts.findIndex(p => p.id === part.id)
-
     if (partIndex >= 0) {
       // Update existing part
       message.parts[partIndex] = part
@@ -293,9 +286,6 @@ const handleEventMessagePartUpdated = (event: Event) => {
       // Add new part
       message.parts.push(part)
     }
-
-    // Re-merge messages to maintain proper grouping
-    currentMessages.value = mergeMessage(currentMessages.value)
   }
 }
 
@@ -323,8 +313,8 @@ const handleEventMessagePartRemoved = (event: Event) => {
     const message = currentMessages.value[messageIndex] as MessageData
     message.parts = message.parts.filter(p => p.id !== partID)
 
-    // Remove message if no parts left
-    if (message.parts.length === 0) {
+    // Remove message if no parts left and it's not a user message
+    if (message.parts.length === 0 && message.info.role !== 'user') {
       currentMessages.value.splice(messageIndex, 1)
     }
   }
@@ -356,15 +346,34 @@ const handleEventPermissionUpdated = (event: Event) => {
 
 const handleEventPermissionReplied = (event: Event) => {
   if (event.type !== 'permission.replied') return
-  const permission = event.properties
-  // if (!activeSession.value || permission.sessionID !== activeSession.value.id) return
-  const index = currentMessages.value.find(message => {
-    return 'permission' in message && message.permission.id === permission.permissionID
+  const reply = event.properties
+  if (!activeSession.value || reply.sessionID !== activeSession.value.id) return
+
+  // Find and remove the permission by permissionID
+  const index = currentMessages.value.findIndex(message => {
+    return 'permission' in message && message.permission.id === reply.permissionID
   })
-  // 移除
-  if (index) {
-    currentMessages.value.splice(currentMessages.value.indexOf(index), 1)
+
+  if (index !== -1) {
+    currentMessages.value.splice(index, 1)
   }
+}
+
+const handleEventSessionUpdated = (event: Event) => {
+  if (event.type !== 'session.updated') return
+  const session = event.properties
+  const sessionIndex = sessionList.value.findIndex(s => s.id === session.info.id)
+  if (sessionIndex !== -1) {
+    sessionList.value[sessionIndex] = session.info
+  }
+}
+
+const handleEventSessionIdle = (event: Event) => {
+  if (event.type !== 'session.idle') return
+  isStreaming.value = false
+  // const session = event.properties
+  // const sessionIndex = sessionList.value.findIndex(s => s.id === session.sessionID)
+
 }
 
 // Event subscription management
@@ -384,10 +393,16 @@ const subscribeToEvents = async () => {
       try {
         for await (const event of events.stream) {
           if (eventController?.signal.aborted) break
-          console.log("Event:", event.type, event.properties)
+          // console.log("Event:", event.type, event.properties)
 
           // Handle different event types
           switch (event.type) {
+            case 'session.updated':
+              handleEventSessionUpdated(event)
+              break
+            case 'session.idle':
+              handleEventSessionIdle(event)
+              break
             case 'message.updated':
               handleEventMessageUpdated(event)
               break
@@ -406,8 +421,12 @@ const subscribeToEvents = async () => {
             case 'permission.replied':
               handleEventPermissionReplied(event)
               break
+            case 'server.connected':
+              // Server connection established, no action needed
+              break
             default:
-            // Log other events for debugging
+              // Log unhandled events for debugging
+              console.log('Unhandled event type:', event.type)
           }
         }
       } catch (error) {
