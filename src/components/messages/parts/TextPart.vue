@@ -1,5 +1,7 @@
 <template>
-    <MarkdownRender :markdown="part.text" class="prose prose-sm text-sm" />
+    <div class="relative">
+        <MarkdownRender :markdown="part.text" class="prose prose-sm text-sm" />
+    </div>
 </template>
 
 <script setup lang="ts">
@@ -9,6 +11,6 @@ import type { TextPart } from '@opencode-ai/sdk'
 interface Props {
     part: TextPart
 }
-
 defineProps<Props>()
+
 </script>

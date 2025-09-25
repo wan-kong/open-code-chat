@@ -1,65 +1,72 @@
 <template>
   <SidebarProvider>
-    <div class="min-h-screen flex w-full">
-      <!-- Sidebar -->
-      <Sidebar>
-        <SidebarHeader class="p-2.5">
-          <ProjectSelector :projects="projects" :current-project="activeProject" @select="handleProjectSelect"
-            @create="handleCreateProject" />
-        </SidebarHeader>
+    <Transition name="app-fade" appear>
+      <div class="min-h-screen flex w-full">
+        <!-- Sidebar -->
+        <Sidebar>
+          <SidebarHeader class="p-2.5">
+            <ProjectSelector :projects="projects" :current-project="activeProject" @select="handleProjectSelect"
+              @create="handleCreateProject" />
+          </SidebarHeader>
 
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupLabel>会话列表</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SessionSelector :sessions="sessionList" :active-session="activeSession" @select="handleSessionSelect"
-                @create="handleSessionCreate" @delete="handleSessionDelete" @update="handleSessionUpdate" />
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-      </Sidebar>
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupLabel>会话列表</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SessionSelector :sessions="sessionList" :active-session="activeSession" @select="handleSessionSelect"
+                  @create="handleSessionCreate" @delete="handleSessionDelete" @update="handleSessionUpdate" />
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+        </Sidebar>
 
-      <!-- Main Content -->
-      <SidebarInset class="flex-1 h-svh overflow-hidden flex flex-col">
-        <!-- Header -->
-        <header class="shrink-0 flex h-14 items-center justify-between border-b px-4 bg-background">
-          <div class="flex gap-1 items-center">
-            <SidebarTrigger class="-ml-1" />
-            <Separator orientation="vertical" class="mr-2 h-4" />
-            <h1 class="text-lg font-semibold">OPENCODE Chat</h1>
-          </div>
-          <div class="flex items-center gap-2">
-            <ModelConfig />
-            <ToolList />
-            <Button size="icon" variant="ghost" class="h-8 w-8" :disabled="!activeProject"
-              @click="showFileSidebar = !showFileSidebar">
-              <FolderTreeIcon class="h-4 w-4" />
-              <span class="sr-only">文件列表</span>
-            </Button>
-            <Avatar class="shrink-0">
-              <AvatarFallback>
-                {{ config?.username?.slice(0, 1) }}
-              </AvatarFallback>
-            </Avatar>
-          </div>
-        </header>
-        <!-- Main Content Area -->
-        <ResizablePanelGroup direction="horizontal" class="flex-1 flex overflow-hidden">
-          <ResizablePanel class="flex-1 flex flex-col overflow-hidden">
-            <ScrollArea class="h-full">
-              <MessageList :messages="mergedMessages" />
-              <div class="sticky bottom-4 mx-auto mb-4 max-w-2xl w-2xl left-1/2 -translate-x-1/2">
-                <MessageInput :is-loading="isLoadingMessages || isStreaming" @send-message="handleSendMessage" />
+        <!-- Main Content -->
+        <SidebarInset class="flex-1 h-svh overflow-hidden flex flex-col">
+          <!-- Header -->
+          <header class="shrink-0 flex h-14 items-center justify-between border-b px-4 bg-background">
+            <div class="flex gap-1 items-center">
+              <SidebarTrigger class="-ml-1" />
+              <Separator orientation="vertical" class="mr-2 h-4" />
+              <h1 class="text-lg font-semibold">OPENCODE Chat</h1>
+            </div>
+            <div class="flex items-center gap-2">
+              <ModelConfig />
+              <ToolList />
+              <Button size="icon" variant="ghost"
+                class="h-8 w-8 transition-all duration-200 hover:scale-110 hover:bg-primary/10"
+                :disabled="!activeProject" @click="showFileSidebar = !showFileSidebar">
+                <FolderTreeIcon class="h-4 w-4 transition-transform duration-200"
+                  :class="showFileSidebar ? 'rotate-90' : ''" />
+                <span class="sr-only">文件列表</span>
+              </Button>
+              <Avatar class="shrink-0 transition-all duration-200 hover:scale-110 hover:shadow-md cursor-pointer">
+                <AvatarFallback>
+                  {{ config?.username?.slice(0, 1) }}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+          </header>
+          <!-- Main Content Area -->
+          <ResizablePanelGroup direction="horizontal" class="flex-1 flex overflow-hidden">
+            <ResizablePanel class="flex-1 overflow-hidden">
+              <div class="h-full overflow-y-auto flex flex-col">
+                <MessageList :messages="mergedMessages" class="flex-1 " />
+                <div class="w-full sticky bottom-4">
+                  <div class=" shrink-0 px-4 mb-4 max-w-2xl mx-auto">
+                    <MessageInput :is-loading="isLoadingMessages || isStreaming" @send-message="handleSendMessage"
+                      placeholder="Work With OPENCODE..." />
+                  </div>
+                </div>
               </div>
-            </ScrollArea>
-          </ResizablePanel>
-          <ResizableHandle v-if="showFileSidebar"></ResizableHandle>
-          <ResizablePanel v-if="showFileSidebar">
-            <FileList :project="activeProject!" :session="activeSession!" />
-          </ResizablePanel>
-        </ResizablePanelGroup>
-      </SidebarInset>
-    </div>
+            </ResizablePanel>
+            <ResizableHandle v-if="showFileSidebar"></ResizableHandle>
+            <ResizablePanel v-if="showFileSidebar">
+              <FileList :project="activeProject!" :session="activeSession!" />
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </SidebarInset>
+      </div>
+    </Transition>
   </SidebarProvider>
 </template>
 
@@ -90,7 +97,6 @@ import { FileList } from './components/file-list'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from './components/ui/resizable'
 import { FolderTreeIcon } from 'lucide-vue-next'
 import { Button } from './components/ui/button'
-import { ScrollArea } from '@/components/ui/scroll-area'
 
 // 项目数据
 const projects = ref<Project[]>([])
@@ -467,3 +473,41 @@ onUnmounted(() => {
 
 
 </script>
+
+<style scoped>
+/* 文件侧边栏滑动动画 */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: all 0.3s ease-out;
+}
+
+.slide-left-enter-from {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.slide-left-leave-to {
+  opacity: 0;
+  transform: translateX(50%);
+}
+
+/* 应用整体加载动画 */
+.app-fade-enter-active {
+  transition: all 0.6s ease-out;
+}
+
+.app-fade-enter-from {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* 头部按钮hover效果 */
+.header-button {
+  transition: all 0.2s ease;
+}
+
+.header-button:hover {
+  transform: scale(1.1);
+  background-color: rgba(var(--primary), 0.1);
+}
+</style>

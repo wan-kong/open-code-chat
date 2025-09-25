@@ -44,3 +44,39 @@ interface Props {
 
 defineProps<Props>()
 </script>
+
+<style scoped>
+/* 消息动画 */
+.message-enter-active {
+    transition: all 0.4s ease-out;
+}
+
+.message-leave-active {
+    transition: all 0.3s ease-in;
+}
+
+.message-enter-from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+}
+
+.message-leave-to {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.98);
+}
+
+.message-move {
+    transition: transform 0.3s ease;
+}
+
+/* 淡入淡出动画 */
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>
